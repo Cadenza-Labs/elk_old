@@ -12,6 +12,7 @@ class CCS(object):
         num_tries=10,
         learning_rate=1e-2,
         device="cuda",
+        on_each_prompt=False,
     ):
         self.include_bias = include_bias
         self.verbose = verbose
@@ -19,6 +20,7 @@ class CCS(object):
         self.num_tries = num_tries
         self.learning_rate = learning_rate
         self.device = device
+        self.on_each_prompt = on_each_prompt
 
     def init_parameters(self):
         """
@@ -201,8 +203,8 @@ class CCS(object):
                 if self.verbose:
                     print(
                         "Found a new best theta. New loss: {:.4f}, \
-                        new acc: {:.4f}".format(
-                            loss, accuracy
+                        new acc: {:.4f}. Trained on each prompt: {}".format(
+                            loss, accuracy, self.on_each_prompt
                         )
                     )
                 self.best_theta = theta_np
