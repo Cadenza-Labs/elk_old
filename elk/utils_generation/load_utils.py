@@ -309,7 +309,7 @@ def get_num_templates_per_dataset(all_dataset_names):
         # if dataset_name in prompt_dict.keys():
         #     amount_of_templates += len(prompt_dict[dataset_name])
         if dataset_name not in ["ag-news", "dbpedia-14"]:
-            amount_of_templates += len(DatasetTemplates("imdb").all_template_names)
+            amount_of_templates += len(DatasetTemplates(*get_hugging_face_load_name(dataset_name)).all_template_names)
         if dataset_name == "copa":
             amount_of_templates -= 4  # do not use the last four prompts
         num_templates_per_dataset.append(amount_of_templates)
