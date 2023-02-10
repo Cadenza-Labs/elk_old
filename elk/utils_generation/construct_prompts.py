@@ -340,7 +340,7 @@ def construct_prompt_dataframe(set_name, dataframe, prompt_idx, mdl_name, tokeni
             Will change according to model type, i.e. for Bert model will add [SEP] in the middle
             Return: A dataframe, with `null`, `0`, `1`, `label`, `selection`, which should be save with hidden states together
     '''
-    from utils_generation.load_utils import get_hugging_face_load_name
+    from elk.utils_generation.load_utils import get_hugging_face_load_name
     prompter = DatasetTemplates(*get_hugging_face_load_name(set_name))
 
     result = {
