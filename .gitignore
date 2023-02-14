@@ -5,7 +5,7 @@ nohup.out
 .idea
 datasets/
 models/
-
+wandb/
 *.pkl
 
 # Byte-compiled / optimized / DLL files
