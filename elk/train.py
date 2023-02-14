@@ -55,14 +55,14 @@ if __name__ == "__main__":
 
     # save models
     # TODO: use better filename for the pkls, so they don't get overwritten
-    args.trained_models_path.mkdir(parents=True, exist_ok=True)
-    wandb.init(project='Track Learned Probes', entity='kozaronek')
-    model_artifacts = wandb.Artifact('trained_models', type='model')
+    # args.trained_models_path.mkdir(parents=True, exist_ok=True)
+    # wandb.init(project='Track Learned Probes', entity='kozaronek')
+    # model_artifacts = wandb.Artifact('trained_models', type='model')
 
     with open(args.trained_models_path / "logistic_regression_model.pkl", "wb") as file:
         pickle.dump(logistic_regression_model, file)
     with open(args.trained_models_path / "ccs_model.pkl", "wb") as file:
         pickle.dump(ccs_model, file)
 
-    model_artifacts.add_dir(args.trained_models_path)
-    wandb.log_artifact(model_artifacts)
+    # model_artifacts.add_dir(args.trained_models_path)
+    # wandb.log_artifact(model_artifacts)

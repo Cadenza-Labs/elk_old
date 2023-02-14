@@ -96,8 +96,8 @@ def evaluate(args, logistic_regression_model, ccs_model):
 if __name__ == "__main__":
     args = get_args(default_config_path=Path(__file__).parent / "default_config.json")
 
-    wandb.init(project='Track Training and Evaluation Results', entity='kozaronek')
-    evaluation_results = wandb.Artifact(name='evaluation_results', type='dataset')
+    # wandb.init(project='Track Training and Evaluation Results', entity='kozaronek')
+    # evaluation_results = wandb.Artifact(name='evaluation_results', type='dataset')
 
     # load pickel from file
     with open(args.trained_models_path / "logistic_regression_model.pkl", "rb") as file:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     with open(args.trained_models_path / "ccs_model.pkl", "rb") as file:
         ccs_model = pickle.load(file)
 
-    evaluate(args, logistic_regression_model, ccs_model)
+    # evaluate(args, logistic_regression_model, ccs_model)
 
-    evaluation_results.add_dir('./evaluation_results')
-    wandb.log_artifact(evaluation_results)
+    # evaluation_results.add_dir('./evaluation_results')
+    # wandb.log_artifact(evaluation_results)
