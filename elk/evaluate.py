@@ -12,6 +12,7 @@ from elk.utils_evaluation.utils_evaluation import (
 from elk.utils_evaluation.parser import get_args
 from elk.utils_evaluation.utils_evaluation import save_df_to_csv
 from pathlib import Path
+import wandb 
 
 
 def evaluate(args, logistic_regression_model, ccs_model):
@@ -95,6 +96,9 @@ def evaluate(args, logistic_regression_model, ccs_model):
 if __name__ == "__main__":
     args = get_args(default_config_path=Path(__file__).parent / "default_config.json")
 
+    wandb.init(project='Track Training and Evaluation Results', entity='kozaronek')
+    evaluation_results = wandb.Artifact(name='evaluation_results', type='dataset')
+
     # load pickel from file
     with open(args.trained_models_path / "logistic_regression_model.pkl", "rb") as file:
         logistic_regression_model = pickle.load(file)
@@ -102,3 +106,6 @@ if __name__ == "__main__":
         ccs_model = pickle.load(file)
 
     evaluate(args, logistic_regression_model, ccs_model)
+
+    evaluation_results.add_dir('./evaluation_results')
+    wandb.log_artifact(evaluation_results)

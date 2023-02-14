@@ -10,9 +10,10 @@ from elk.utils_evaluation.utils_evaluation import (
     split,
 )
 from elk.utils_evaluation.parser import get_args
-
+import wandb 
 
 def train(args):
+
     hidden_states = get_hidden_states(
         hidden_states_directory=args.hidden_states_directory,
         model_name=args.model,
@@ -49,14 +50,19 @@ def train(args):
 if __name__ == "__main__":
     args = get_args(default_config_path=Path(__file__).parent / "default_config.json")
     print(f"-------- args = {args} --------")
-
+    
     logistic_regression_model, ccs_model = train(args)
 
     # save models
     # TODO: use better filename for the pkls, so they don't get overwritten
-    args.trained_models_path.mkdir(parents=True, exist_ok=True) 
+    args.trained_models_path.mkdir(parents=True, exist_ok=True)
+    wandb.init(project='Track Learned Probes', entity='kozaronek')
+    model_artifacts = wandb.Artifact('trained_models', type='model')
 
     with open(args.trained_models_path / "logistic_regression_model.pkl", "wb") as file:
         pickle.dump(logistic_regression_model, file)
     with open(args.trained_models_path / "ccs_model.pkl", "wb") as file:
         pickle.dump(ccs_model, file)
+
+    model_artifacts.add_dir(args.trained_models_path)
+    wandb.log_artifact(model_artifacts)
