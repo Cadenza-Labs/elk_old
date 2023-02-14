@@ -1,9 +1,10 @@
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+import wandb
+from torch import nn 
 
-
-class CCS(object):
+class CCS(nn.Module):
     def __init__(
         self,
         verbose=False,
@@ -13,6 +14,7 @@ class CCS(object):
         learning_rate=1e-2,
         device="cuda",
     ):
+        super().__init__()
         self.include_bias = include_bias
         self.verbose = verbose
         self.num_epochs = num_epochs
@@ -111,7 +113,7 @@ class CCS(object):
             return max(acc, 1 - acc), loss
         return max(acc, 1 - acc)
 
-    def single_train(self):
+    def single_train(self, run_num):
         """
         Does a single training run of num_epochs epochs
         """
@@ -131,7 +133,7 @@ class CCS(object):
         optimizer = torch.optim.AdamW([theta], lr=self.learning_rate)
 
         # Start training (full batch)
-        for _ in range(self.num_epochs):
+        for epoch in range(self.num_epochs):
 
             # project onto theta
             z0, z1 = x0.mm(theta.T), x1.mm(theta.T)
@@ -153,6 +155,8 @@ class CCS(object):
             theta_np = theta.cpu().detach().numpy().reshape(1, -1)
             # print("Norm of theta is " + str(np.linalg.norm(theta_np)))
             loss_np = loss.detach().cpu().item()
+
+            self.train_log(loss_np, theta_np, epoch=epoch, run_num=run_num)
 
         return theta_np, loss_np
 
@@ -189,10 +193,11 @@ class CCS(object):
         self.y = label.reshape(-1)
         self.d = self.x0.shape[-1]
 
-        for _ in range(self.num_tries):
-            theta_np, loss = self.single_train()
+        for run_num in range(self.num_tries):
+            theta_np, loss = self.single_train(run_num)
 
             accuracy = self.get_accuracy(theta_np, data, label, getloss=False)
+            self.acc_log(accuracy, run_num=run_num)
 
             losses.append(loss)
             accuracies.append(accuracy)
@@ -213,6 +218,16 @@ class CCS(object):
             self.visualize(losses, accuracies)
 
         return self.best_theta, self.best_loss, best_acc
+
+    def train_log(self, loss, theta, run_num, epoch):
+        loss = float(loss)
+        theta = theta
+        epoch = int(epoch)
+
+        wandb.log({"loss": loss, "run_num": run_num, "theta": theta}, step=epoch)
+
+    def acc_log(sef, acc, run_num):
+        wandb.log({"acc": acc}, step=run_num)
 
     def score(self, data: list, label, getloss=False):
         self.validate_data(data)
