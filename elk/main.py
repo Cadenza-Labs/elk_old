@@ -13,8 +13,6 @@ import pandas as pd
 import torch
 
 if __name__ == "__main__":
-    run = wandb.init(project='Track Training and Evaluation Results', entity='kozaronek')
-
     args = get_args(default_config_path=Path(__file__).parent / "default_config.json")
     os.makedirs(args.trained_models_path, exist_ok=True)
 

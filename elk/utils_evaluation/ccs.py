@@ -13,6 +13,7 @@ class CCS(nn.Module):
         num_tries=10,
         learning_rate=1e-2,
         device="cuda",
+        on_each_prompt=False,
     ):
         super().__init__()
         self.include_bias = include_bias
@@ -21,6 +22,8 @@ class CCS(nn.Module):
         self.num_tries = num_tries
         self.learning_rate = learning_rate
         self.device = device
+        self.on_each_prompt = on_each_prompt
+
 
     def init_parameters(self):
         """
@@ -206,8 +209,8 @@ class CCS(nn.Module):
                 if self.verbose:
                     print(
                         "Found a new best theta. New loss: {:.4f}, \
-                        new acc: {:.4f}".format(
-                            loss, accuracy
+                        new acc: {:.4f}. Trained on each prompt: {}".format(
+                            loss, accuracy, self.on_each_prompt
                         )
                     )
                 self.best_theta = theta_np
@@ -217,7 +220,7 @@ class CCS(nn.Module):
         if self.verbose:
             self.visualize(losses, accuracies)
 
-        return self.best_theta, self.best_loss, best_acc
+        return self.best_theta, self.best_loss, best_acc, losses, accuracies 
 
     def train_log(self, loss, theta, run_num, epoch):
         loss = float(loss)
