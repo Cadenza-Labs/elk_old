@@ -1,5 +1,5 @@
 import pickle
-
+import os 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from pathlib import Path
@@ -27,9 +27,10 @@ def train_per_prompt(args, hidden_states, split='train', rate=0.6):
     """
     losses = []
     accuracies = []
+    models = []
 
     for i, prompt_hiddens in enumerate(hidden_states):
-        run = wandb.init(project='Train CCS per Prompt vs CCS on all prompts', 
+        run = wandb.init(project=args.project_name, 
                          group=f'Individual Prompts',
                          entity='kozaronek', 
                          reinit=True)
@@ -59,6 +60,7 @@ def train_per_prompt(args, hidden_states, split='train', rate=0.6):
         _, best_loss, best_acc, _, _ = ccs_per_prompt.fit(data=data, label=labels)
         losses.append(best_loss)
         accuracies.append(best_acc)
+        models.append(ccs_per_prompt)
         print(f"done training prompt related ccs model number: {i}")
         
         wandb.log({
@@ -68,7 +70,7 @@ def train_per_prompt(args, hidden_states, split='train', rate=0.6):
         })
         run.finish()
 
-    return losses, accuracies
+    return losses, accuracies, models
 
 
 def train(args):
@@ -84,7 +86,7 @@ def train(args):
         num_data=args.num_data,
     )
 
-    losses, accuracies = train_per_prompt(args, hidden_states)
+    losses, accuracies, all_ccs_per_prompt = train_per_prompt(args, hidden_states)
 
     # TODO: Set the random seed for the permutation
 
@@ -96,7 +98,7 @@ def train(args):
     assert len(data.shape) == 2
     
     print("train classification model")
-    run = wandb.init(project='Train CCS per Prompt vs CCS on all prompts',
+    run = wandb.init(project=args.project_name,
                      group=f'Logistic Regression',
                      entity='kozaronek', 
                      reinit=True)
@@ -113,7 +115,7 @@ def train(args):
 
 
     print("train ccs model")
-    run = wandb.init(project='Train CCS per Prompt vs CCS on all prompts',
+    run = wandb.init(project=args.project_name,
                      group=f'All Prompts',
                      entity='kozaronek', 
                      reinit=True)
@@ -131,18 +133,25 @@ def train(args):
         })
     run.finish()
 
-    return logistic_regression_model, ccs_all_prompts
+    return logistic_regression_model, ccs_all_prompts, all_ccs_per_prompt
 
+def save_trained_models(args, logistic_regression_model, ccs_all_prompts, all_ccs_per_prompt):
+    # save models
+    os.makedirs(args.trained_models_path / f"on_{args.dataset}", exist_ok=True)
+    os.makedirs(args.trained_models_path / f"on_{args.dataset}/ccs_per_prompt", exist_ok=True)
+
+    # TODO: use better filename for the pkls, so they don't get overwritten
+    with open(args.trained_models_path / f"on_{args.dataset}/logistic_regression_model.pkl", "wb") as file:
+        pickle.dump(logistic_regression_model, file)
+    with open(args.trained_models_path / f"on_{args.dataset}/ccs_model.pkl", "wb") as file:
+        pickle.dump(ccs_model, file)
+    for i, ccs_per_prompt in enumerate(all_ccs_per_prompt):
+        with open(args.trained_models_path / f"on_{args.dataset}/ccs_per_prompt/model_{i}.pkl", "wb") as file:
+            pickle.dump(ccs_per_prompt, file)
 
 if __name__ == "__main__":
     args = get_args(default_config_path=Path(__file__).parent / "default_config.json")
     print(f"-------- args = {args} --------")
     
-    logistic_regression_model, ccs_model = train(args)
-
-    # save models
-    # TODO: use better filename for the pkls, so they don't get overwritten
-    with open(args.trained_models_path / "logistic_regression_model.pkl", "wb") as file:
-        pickle.dump(logistic_regression_model, file)
-    with open(args.trained_models_path / "ccs_model.pkl", "wb") as file:
-        pickle.dump(ccs_model, file)
+    logistic_regression_model, ccs_model, all_ccs_per_prompt = train(args)
+    save_trained_models(args, logistic_regression_model, ccs_model, all_ccs_per_prompt)
