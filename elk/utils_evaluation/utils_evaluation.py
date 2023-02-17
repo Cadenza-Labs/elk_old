@@ -144,7 +144,7 @@ def split(hidden_states, permutation, prompts, split="train"):
 
 
 def save_df_to_csv(args, df, prefix, str=""):
-    dir = args.save_dir / f"{args.model}_{prefix}_{args.seed}.csv"
+    dir = args.save_dir / f"{args.model}_{args.prefix}_{args.seed}_trained_{args.dataset}_eval_{args.dataset_eval}.csv"
     df.to_csv(dir, index=False)
     print(
         f"{str} Saving to {dir} at"
@@ -162,7 +162,7 @@ def append_stats(stats_df, args, method, avg_accuracy, avg_accuracy_std, avg_los
             # TODO:for now we train and test on the
             # same dataset (with a split of course)
             "train": args.dataset,
-            "test": args.dataset,
+            "test": args.dataset_eval,
             "accuracy": avg_accuracy,
             "std": avg_accuracy_std,
             "language_model_type": args.language_model_type,

@@ -13,9 +13,11 @@ def get_args(default_config_path=Path(__file__).parent / "default_config.json"):
     models_layer_num = default_config["models_layer_num"]
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--project_name", type=str, default='Default CCS')
     parser.add_argument("--model", type=str, choices=models)
     parser.add_argument("--prefix", default="normal", choices=prefix)
     parser.add_argument("--dataset", default=datasets[0])
+    parser.add_argument("--dataset_eval", default=datasets[0])
     parser.add_argument("--num_data", type=int, default=10)
     parser.add_argument(
         "--mode",
