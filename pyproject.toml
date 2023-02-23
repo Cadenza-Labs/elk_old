@@ -29,6 +29,7 @@ version = "0.0.1"
 dev = [
     "pre-commit",
     "pytest",
+    "pdbpp",
 ]
 
 [tool.setuptools]
